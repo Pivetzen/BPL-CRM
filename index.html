@@ -132,7 +132,6 @@
             // Renderiza Clientes
             document.getElementById('client-list').innerHTML = dados.clientes.map(c => `
                 <tr class="border-b">
-                    // Onde antes era apenas ${c.nome}, mude para:
                     <td class="p-4 font-semibold text-indigo-700 cursor-pointer hover:underline" 
                         onclick="abrirPerfil('${c.nome}')">
                         ${c.nome}
