@@ -39,7 +39,14 @@
             <div id="config" class="page hidden">
                 <h2 class="text-3xl font-semibold mb-6">Configurações</h2>
                 <div class="bg-white p-6 rounded-xl shadow-sm">
-                    <p>Use a planilha para alterar a cor do tema (Aba Configuracoes, B1).</p>
+                    <label class="block mb-2 font-medium">Cor do Sistema:</label>
+                    <select id="color-picker" onchange="salvarConfig(this.value)" class="w-full p-2 border rounded-lg">
+                        <option value="indigo">Indigo</option>
+                        <option value="red">Vermelho</option>
+                        <option value="green">Verde</option>
+                        <option value="blue">Azul</option>
+                        <option value="purple">Roxo</option>
+                    </select>
                 </div>
             </div>
         </main>
@@ -60,6 +67,7 @@
             // Aplica cor do tema
             const cor = dados.cor || 'indigo';
             document.getElementById('sidebar').className = `w-64 bg-${cor}-900 text-white p-6`;
+            document.getElementById('color-picker').value = cor;
             
             // Renderiza Clientes
             document.getElementById('client-list').innerHTML = `
@@ -91,6 +99,14 @@
             await fetch(SHEET_URL, {
                 method: 'POST',
                 body: JSON.stringify({ action: 'update', nome, novoStatus })
+            });
+            carregarTudo();
+        }
+
+        async function salvarConfig(cor) {
+            await fetch(SHEET_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'saveConfig', cor })
             });
             carregarTudo();
         }
