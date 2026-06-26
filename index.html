@@ -81,6 +81,7 @@
 
     <script>
         const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwKIcq93smFI4V6D0RAh5NNZuBHa1MYdEDMSp7O7JfFTrsp1jm_9owfR4U77blGONPV/exec';
+        let todosAgendamentos = [];
 
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
@@ -89,27 +90,28 @@
         
         // Função para abrir o perfil de um cliente
         function abrirPerfil(nomeCliente) {
-            // 1. Define o nome no título
             document.getElementById('perfil-nome').innerText = nomeCliente;
             
-            // 2. Filtra os agendamentos que pertencem a esse cliente
-            const agendamentosDoCliente = window.todosAgendamentos.filter(a => a.cliente === nomeCliente);
+            // Filtra os agendamentos pelo nome (garantindo que não seja case-sensitive)
+            const agendamentosDoCliente = window.todosAgendamentos.filter(a => 
+                a.cliente.trim().toLowerCase() === nomeCliente.trim().toLowerCase()
+            );
             
-            // 3. Renderiza no histórico
             const historico = document.getElementById('historico-list');
-            historico.innerHTML = agendamentosDoCliente.length > 0 
-                ? agendamentosDoCliente.map(a => `
+            
+            if (agendamentosDoCliente.length > 0) {
+                historico.innerHTML = agendamentosDoCliente.map(a => `
                     <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-indigo-500">
                         <p class="font-bold">${a.tarefa}</p>
                         <p class="text-sm text-gray-500">${a.data} - ${a.hora}</p>
                     </div>
-                `).join('')
-                : '<p class="text-gray-500 italic">Nenhum atendimento agendado para este cliente.</p>';
+                `).join('');
+            } else {
+                historico.innerHTML = '<p class="text-gray-500 italic p-4">Nenhum atendimento agendado para este cliente.</p>';
+            }
             
-            // 4. Mostra a página
             showPage('perfil-cliente');
-        }
-        
+        }        
         // Lembre-se de salvar os agendamentos globalmente no carregarTudo()
         // No início do script, declare: let todosAgendamentos = [];
         // Dentro do carregarTudo(), adicione: window.todosAgendamentos = dados.agenda;
@@ -117,6 +119,7 @@
         async function carregarTudo() {
             const res = await fetch(SHEET_URL);
             const dados = await res.json();
+            window.todosAgendamentos = dados.agenda;
             
             // Aplica cor do tema
             const cor = dados.cor || 'indigo';
