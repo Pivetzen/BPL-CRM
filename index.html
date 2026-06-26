@@ -68,6 +68,14 @@
                     </select>
                 </div>
             </div>
+            <div id="perfil-cliente" class="page hidden">
+                <button onclick="showPage('clientes')" class="text-indigo-600 mb-4"><i class="fas fa-arrow-left"></i> Voltar</button>
+                <h2 id="perfil-nome" class="text-3xl font-bold mb-6">Nome do Cliente</h2>
+                
+                <h3 class="text-xl font-semibold mb-4">Histórico de Atendimentos</h3>
+                <div id="historico-list" class="space-y-4">
+                    </div>
+            </div>
         </main>
     </div>
 
@@ -78,7 +86,34 @@
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
         }
-
+        
+        // Função para abrir o perfil de um cliente
+        function abrirPerfil(nomeCliente) {
+            // 1. Define o nome no título
+            document.getElementById('perfil-nome').innerText = nomeCliente;
+            
+            // 2. Filtra os agendamentos que pertencem a esse cliente
+            const agendamentosDoCliente = window.todosAgendamentos.filter(a => a.cliente === nomeCliente);
+            
+            // 3. Renderiza no histórico
+            const historico = document.getElementById('historico-list');
+            historico.innerHTML = agendamentosDoCliente.length > 0 
+                ? agendamentosDoCliente.map(a => `
+                    <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-indigo-500">
+                        <p class="font-bold">${a.tarefa}</p>
+                        <p class="text-sm text-gray-500">${a.data} - ${a.hora}</p>
+                    </div>
+                `).join('')
+                : '<p class="text-gray-500 italic">Nenhum atendimento agendado para este cliente.</p>';
+            
+            // 4. Mostra a página
+            showPage('perfil-cliente');
+        }
+        
+        // Lembre-se de salvar os agendamentos globalmente no carregarTudo()
+        // No início do script, declare: let todosAgendamentos = [];
+        // Dentro do carregarTudo(), adicione: window.todosAgendamentos = dados.agenda;
+        
         async function carregarTudo() {
             const res = await fetch(SHEET_URL);
             const dados = await res.json();
@@ -97,7 +132,11 @@
             // Renderiza Clientes
             document.getElementById('client-list').innerHTML = dados.clientes.map(c => `
                 <tr class="border-b">
-                    <td class="p-4 font-medium">${c.nome}</td>
+                    // Onde antes era apenas ${c.nome}, mude para:
+                    <td class="p-4 font-semibold text-indigo-700 cursor-pointer hover:underline" 
+                        onclick="abrirPerfil('${c.nome}')">
+                        ${c.nome}
+                    </td>
                     <td class="p-4">
                         <a href="https://wa.me/55${c.contato.replace(/\D/g, '')}" target="_blank" class="text-green-600 hover:underline">
                             <i class="fab fa-whatsapp"></i> ${c.contato}
