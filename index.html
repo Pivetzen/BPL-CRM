@@ -3,69 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM Local - Agenda</title>
+    <title>CRM Local</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { colors: { primary: 'var(--primary-color)' } } } }
+    </script>
+    <style id="theme-style"></style>
 </head>
 <body class="bg-gray-100 font-sans">
     <div class="flex h-screen">
-        <aside class="w-64 bg-indigo-900 text-white p-6">
+        <aside id="sidebar" class="w-64 text-white p-6 transition-colors duration-500">
             <h1 class="text-2xl font-bold mb-10"><i class="fas fa-chart-line mr-2"></i> CRM Local</h1>
             <nav>
                 <ul class="space-y-4">
-                    <li onclick="showPage('clientes')" class="p-3 rounded-lg cursor-pointer hover:bg-indigo-800"><i class="fas fa-users mr-3"></i> Clientes</li>
-                    <li onclick="showPage('agenda')" class="p-3 rounded-lg cursor-pointer hover:bg-indigo-800"><i class="fas fa-calendar-alt mr-3"></i> Agenda</li>
+                    <li onclick="showPage('clientes')" class="p-3 rounded-lg cursor-pointer hover:opacity-80"><i class="fas fa-users mr-3"></i> Clientes</li>
+                    <li onclick="showPage('agenda')" class="p-3 rounded-lg cursor-pointer hover:opacity-80"><i class="fas fa-calendar-alt mr-3"></i> Agenda</li>
                 </ul>
             </nav>
         </aside>
 
         <main class="flex-1 p-8 overflow-y-auto">
-            <!-- ABA CLIENTES -->
-            <div id="clientes" class="page">
-                <h2 class="text-3xl font-semibold text-gray-800 mb-6">Clientes</h2>
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <table class="w-full text-left">
-                        <thead class="bg-gray-50"><tr><th class="p-4">Nome</th><th class="p-4">Contato</th></tr></thead>
-                        <tbody id="client-list"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- ABA AGENDA -->
-            <div id="agenda" class="page hidden">
-                <h2 class="text-3xl font-semibold text-gray-800 mb-6">Minha Agenda</h2>
-                <div class="grid grid-cols-1 gap-4" id="agenda-list"></div>
-            </div>
+            <div id="clientes" class="page"><h2 class="text-3xl font-semibold text-gray-800 mb-6">Clientes</h2><div id="client-list" class="bg-white p-6 rounded-xl shadow-sm"></div></div>
+            <div id="agenda" class="page hidden"><h2 class="text-3xl font-semibold text-gray-800 mb-6">Agenda</h2><div id="agenda-list" class="grid grid-cols-1 gap-4"></div></div>
         </main>
     </div>
 
     <script>
         const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwKIcq93smFI4V6D0RAh5NNZuBHa1MYdEDMSp7O7JfFTrsp1jm_9owfR4U77blGONPV/exec';
 
+        async function carregarTudo() {
+            const res = await fetch(SHEET_URL);
+            const dados = await res.json();
+            
+            // Aplicar Tema
+            const cor = dados.cor;
+            document.getElementById('sidebar').className = `w-64 bg-${cor}-900 text-white p-6`;
+            
+            document.getElementById('client-list').innerHTML = dados.clientes.map(c => `<p class="border-b py-2">${c.nome}</p>`).join('');
+            document.getElementById('agenda-list').innerHTML = dados.agenda.map(a => 
+                `<div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-${cor}-500">
+                    <p class="font-bold">${a.tarefa}</p>
+                </div>`).join('');
+        }
+
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
         }
 
-        async function carregarDados() {
-            const res = await fetch(SHEET_URL);
-            const dados = await res.json();
-            
-            // Renderiza Clientes
-            document.getElementById('client-list').innerHTML = dados.clientes.map(c => 
-                `<tr class="border-t"> <td class="p-4">${c.nome}</td> <td class="p-4">${c.contato}</td> </tr>`
-            ).join('');
-
-            // Renderiza Agenda
-            document.getElementById('agenda-list').innerHTML = dados.agenda.map(a => 
-                `<div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-yellow-500">
-                    <p class="font-bold text-lg">${a.tarefa}</p>
-                    <p class="text-gray-500 text-sm"><i class="fas fa-clock mr-2"></i> ${a.data} às ${a.hora}</p>
-                </div>`
-            ).join('');
-        }
-
-        carregarDados();
+        carregarTudo();
     </script>
 </body>
 </html>
