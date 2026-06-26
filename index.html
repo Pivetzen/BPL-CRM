@@ -8,56 +8,46 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 font-sans">
-
     <div class="flex h-screen">
         <aside class="w-64 bg-indigo-900 text-white p-6">
             <h1 class="text-2xl font-bold mb-10"><i class="fas fa-chart-line mr-2"></i> CRM Local</h1>
-            <nav>
-                <ul class="space-y-4">
-                    <li class="bg-indigo-800 p-3 rounded-lg cursor-pointer"><i class="fas fa-users mr-3"></i> Clientes</li>
-                    <li class="hover:bg-indigo-800 p-3 rounded-lg cursor-pointer"><i class="fas fa-calendar-alt mr-3"></i> Agenda</li>
-                    <li class="hover:bg-indigo-800 p-3 rounded-lg cursor-pointer"><i class="fas fa-cog mr-3"></i> Configurações</li>
-                </ul>
-            </nav>
+            <nav><ul class="space-y-4"><li class="bg-indigo-800 p-3 rounded-lg"><i class="fas fa-users mr-3"></i> Clientes</li></ul></nav>
         </aside>
-
         <main class="flex-1 p-8">
             <header class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-semibold text-gray-800">Gestão de Clientes</h2>
-                <button class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
-                    <i class="fas fa-plus mr-2"></i> Novo Cliente
-                </button>
             </header>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-indigo-500">
-                    <p class="text-gray-500">Total de Clientes</p>
-                    <h3 class="text-2xl font-bold">124</h3>
-                </div>
-            </div>
-
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                 <table class="w-full text-left">
                     <thead class="bg-gray-50">
-                        <tr>
-                            <th class="p-4 font-semibold text-gray-700">Nome</th>
-                            <th class="p-4 font-semibold text-gray-700">Contato</th>
-                            <th class="p-4 font-semibold text-gray-700">Status</th>
-                            <th class="p-4 font-semibold text-gray-700">Ações</th>
-                        </tr>
+                        <tr><th class="p-4">Nome</th><th class="p-4">Contato</th><th class="p-4">Status</th></tr>
                     </thead>
-                    <tbody id="client-list">
-                        <tr class="border-t">
-                            <td class="p-4">Exemplo Empresa</td>
-                            <td class="p-4">(85) 99999-9999</td>
-                            <td class="p-4"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Ativo</span></td>
-                            <td class="p-4 text-indigo-600 cursor-pointer"><i class="fas fa-edit"></i></td>
-                        </tr>
-                    </tbody>
+                    <tbody id="client-list"></tbody>
                 </table>
             </div>
         </main>
     </div>
 
+    <script>
+        const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwKIcq93smFI4V6D0RAh5NNZuBHa1MYdEDMSp7O7JfFTrsp1jm_9owfR4U77blGONPV/exec';
+
+        async function carregarClientes() {
+            const list = document.getElementById('client-list');
+            try {
+                const response = await fetch(SHEET_URL);
+                const data = await response.json();
+                list.innerHTML = data.map(c => `
+                    <tr class="border-t">
+                        <td class="p-4">${c.nome}</td>
+                        <td class="p-4">${c.contato}</td>
+                        <td class="p-4"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">${c.status}</span></td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                list.innerHTML = '<tr><td class="p-4 text-red-500">Erro ao carregar dados.</td></tr>';
+            }
+        }
+        carregarClientes();
+    </script>
 </body>
 </html>
